@@ -1,6 +1,5 @@
 import json
 
-
 def addUser(nome):
     with open('dados.json') as json_file:
         data = json.load(json_file)

@@ -25,71 +25,75 @@ auth.set_access_token(access_token,access_token_secret)
 api=tweepy.API(auth)
 
 def getRequests():
-    while True:
-        requisicao = client.request('https://api.twitter.com/1.1/application/rate_limit_status.json')
+    requisicao = client.request('https://api.twitter.com/1.1/application/rate_limit_status.json')
 
-        decoder = requisicao[1].decode()
+    decoder = requisicao[1].decode()
 
-        obj = json.loads(decoder)
-        requests_faltando = obj['resources']['followers']['/followers/list']['remaining']
-        statuses_update_remaining = obj['resources']['drafts']['/drafts/statuses/update']['remaining']
-        statuses_update_limit = obj['resources']['drafts']['/drafts/statuses/update']['limit'] 
-        statuses_update_reset = obj['resources']['drafts']['/drafts/statuses/update']['reset']
-        hora_para_reset = statuses_update_reset / 3600
-        min_para_reset = statuses_update_reset / 60
-        seg_para_reset = statuses_update_reset
-        print(f'Requests: faltam {requests_faltando}')
-        print(f'Satus Update: {statuses_update_remaining}/{statuses_update_limit} Falta {hora_para_reset}h {min_para_reset}m {seg_para_reset}s')
-        time.sleep(1)
+    obj = json.loads(decoder)
+    requests_faltando = obj['resources']['followers']['/followers/list']['remaining']
+    #statuses_update_remaining = obj['resources']['drafts']['/drafts/statuses/update']['remaining']
+    #statuses_update_limit = obj['resources']['drafts']['/drafts/statuses/update']['limit'] 
+    #statuses_update_reset = obj['resources']['drafts']['/drafts/statuses/update']['reset']
+    #hora_para_reset = statuses_update_reset / 3600
+    #min_para_reset = statuses_update_reset / 60
+    #seg_para_reset = statuses_update_reset
+    print(f'Requests left: {requests_faltando}')
+    #print(f'Satus Update: {statuses_update_remaining}/{statuses_update_limit} Falta {hora_para_reset}h {min_para_reset}m {seg_para_reset}s')
+    time.sleep(1)
 
 
-def twittar(texto):
-    nfoto = randint(0,52)
-    print(f'Numero da foto: {nfoto}')
-    api.update_with_media(f'./Fotos/{nfoto}.jpg', texto)
+def tweet(texto):
+    picture_number = randint(0,52)  #52 = number of pictures in 'Images' folder
+    #print(f'Picture number: {nfoto}')
+    api.update_with_media(f'./Images/{picture_number}.jpg', texto)
 
 
 def start():
     while True:
         try:
-            print('Verificando De novo...')
+            print('Checking again...')
             requisicao = client.request('https://api.twitter.com/1.1/followers/list.json?count=200')
 
             decoder = requisicao[1].decode()
 
             obj = json.loads(decoder)
-            # print(obj['users'][0]['screen_name'])
             followers = obj['users']
             total_de_folowers = getFollowersNow()
-            #print(f'Total de folowers = {total_de_folowers}')
 
-            print(f'Total de folowers : {total_de_folowers}')
+            print(f'Followers count: {total_de_folowers}')
 
-            print('--- Verificando folowers novos...')
+            print('--- Checking new followers ...')
+            followers_waiting = 0
 
-            for x in range(0,20):
-                nome_do_seguidor = followers[x]['screen_name']
-                if not nome_do_seguidor in getFollowersJson():
-                    twittar(f'Obrigado @{nome_do_seguidor} por me seguir :)')
-                    addUser(nome_do_seguidor)
-                    print(f'@{nome_do_seguidor} Começou a seguir o BOT')
-                    print(f'{x}/20')
+            for x in range(0,200):
+                follower_name = followers[x]['screen_name']
+                if not follower_name in getFollowersJson():
+                    followers_waiting = followers_waiting + 1
+
+            for x in range(0,200):
+                follower_name = followers[x]['screen_name']
+                if not follower_name in getFollowersJson():
+                    followers_waiting = followers_waiting - 1
+                    tweet(f'Obrigado @{follower_name} por me seguir :)') # 'Thank you @{follower_name}!
+                    addUser(follower_name)
+                    print(f'@{follower_name} is now following the BOT')
+                    print(f'Position : {followers_waiting}')
                     time.sleep(5)
 
             getRequests()
-            print('Aguardando mais um minuto...')
+            print('Waiting a minute...')
         except tweepy.error.TweepError as tpe:
             print(f'ERROR: {tpe}')
-            print('ERROR: trying again...')   
+            print('ERROR: trying again...')  
+            time.sleep(5 * 60) 
         time.sleep(61)
 
-def debug():
+def addAllFollowersToJsonFile():
         requisicao = client.request('https://api.twitter.com/1.1/followers/list.json?count=200')
 
         decoder = requisicao[1].decode()
 
         obj = json.loads(decoder)
-        # print(obj['users'][0]['screen_name'])
         followers = obj['users']
         total_de_folowers = int(len(followers))
         print('Total :', total_de_folowers)
@@ -97,14 +101,14 @@ def debug():
         for x in range(total_de_folowers):
             follower = followers[x]['screen_name']
             addUser(follower)
-        print('Seguidoes adicionados a database com sucesso!')
+        print('Followers successfully added!')
 
 def getFollowersNow():
-    follower_count = api.get_user('focacharmosa').followers_count
+    twitter_acount_user = credentials.account_user
+    follower_count = api.get_user(twitter_acount_user).followers_count
     return follower_count
 
-#start()
-getRequests()
+start()
 
 
 
