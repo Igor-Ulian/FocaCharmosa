@@ -4,9 +4,12 @@ import json
 import time
 import tweepy
 from random import randint
-from jsonDB import addUser
-from jsonDB import verifyUser
-from jsonDB import getFollowersJson
+from jsonFollowers import addUser
+from jsonFollowers import verifyUser
+from jsonFollowers import getFollowersJson
+from jsonFollowers import addFollowerInQueue
+from jsonFollowers import deleteFollowerInQueue
+from jsonFollowers import getQueueList
 import credentials
 
 # Replace with your own keys/tokens 
@@ -24,22 +27,14 @@ auth=tweepy.OAuthHandler(api_key,api_secret_key)
 auth.set_access_token(access_token,access_token_secret)
 api=tweepy.API(auth)
 
-def getRequests():
-    requisicao = client.request('https://api.twitter.com/1.1/application/rate_limit_status.json')
+def getRequests(): # Get how many requests are left 
+    request = client.request('https://api.twitter.com/1.1/application/rate_limit_status.json')
 
-    decoder = requisicao[1].decode()
+    decoder = request[1].decode()
 
     obj = json.loads(decoder)
     requests_faltando = obj['resources']['followers']['/followers/list']['remaining']
-    #statuses_update_remaining = obj['resources']['drafts']['/drafts/statuses/update']['remaining']
-    #statuses_update_limit = obj['resources']['drafts']['/drafts/statuses/update']['limit'] 
-    #statuses_update_reset = obj['resources']['drafts']['/drafts/statuses/update']['reset']
-    #hora_para_reset = statuses_update_reset / 3600
-    #min_para_reset = statuses_update_reset / 60
-    #seg_para_reset = statuses_update_reset
     print(f'Requests left: {requests_faltando}')
-    #print(f'Satus Update: {statuses_update_remaining}/{statuses_update_limit} Falta {hora_para_reset}h {min_para_reset}m {seg_para_reset}s')
-    time.sleep(1)
 
 
 def tweet(texto):
@@ -52,9 +47,9 @@ def start():
     while True:
         try:
             print('Checking again...')
-            requisicao = client.request('https://api.twitter.com/1.1/followers/list.json?count=200')
+            request = client.request('https://api.twitter.com/1.1/followers/list.json?count=200')
 
-            decoder = requisicao[1].decode()
+            decoder = request[1].decode()
 
             obj = json.loads(decoder)
             followers = obj['users']
@@ -65,26 +60,30 @@ def start():
             print('--- Checking new followers ...')
             followers_waiting = 0
 
-            for x in range(0,200):
+            # Adding all new folllowers to followers_in_queue file
+            for x in range(0,200): 
                 follower_name = followers[x]['screen_name']
-                if not follower_name in getFollowersJson():
-                    followers_waiting = followers_waiting + 1
+                addFollowerInQueue(follower_name)
 
-            for x in range(0,200):
-                follower_name = followers[x]['screen_name']
-                if not follower_name in getFollowersJson():
-                    followers_waiting = followers_waiting - 1
-                    tweet(f'Obrigado @{follower_name} por me seguir :)') # 'Thank you @{follower_name}!
-                    addUser(follower_name)
-                    print(f'@{follower_name} is now following the BOT')
-                    print(f'Position : {followers_waiting}')
-                    time.sleep(5)
+            queue_range = len(getQueueList())
+
+            # Get all followers in queue and tweet  
+            for x in range(0,queue_range): 
+                follower_name = getQueueList()[x]
+                followers_waiting = queue_range
+                tweet(f'Obrigado @{follower_name} por me seguir :)') # 'Thank you @{follower_name} :)!
+                deleteFollowerInQueue(follower_name)
+                addUser(follower_name)
+                print(f'@{follower_name} is now following the BOT')
+                print(f'Position : {followers_waiting}')
+                time.sleep(6)
 
             getRequests()
             print('Waiting a minute...')
         except tweepy.error.TweepError as tpe:
             print(f'ERROR: {tpe}')
             print('ERROR: trying again...')  
+            time.sleep(5 * 60)  
             time.sleep(5 * 60) 
         time.sleep(61)
 
