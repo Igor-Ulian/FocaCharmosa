@@ -4,3 +4,4 @@ credentials.py
 dados.json
 *.jpg
 arruamarSeguidor.txt
+followers_in_queue.json

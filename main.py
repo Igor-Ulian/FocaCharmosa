@@ -37,9 +37,10 @@ def getRequests(): # Get how many requests are left
     print(f'Requests left: {requests_faltando}')
 
 
-def tweet(texto):
+def tweet(follower_name):
     picture_number = randint(0,52)  #52 = number of pictures in 'Images' folder
     #print(f'Picture number: {nfoto}')
+    texto = f'Obrigado @{follower_name} por me seguir :)'
     api.update_with_media(f'./Images/{picture_number}.jpg', texto)
 
 
@@ -66,25 +67,26 @@ def start():
                 addFollowerInQueue(follower_name)
 
             queue_range = len(getQueueList())
-
+            if queue_range >= 20: queue_range = 20
             # Get all followers in queue and tweet  
-            for x in range(0,queue_range): 
-                follower_name = getQueueList()[x]
-                followers_waiting = queue_range
-                tweet(f'Obrigado @{follower_name} por me seguir :)') # 'Thank you @{follower_name} :)!
+            for x in range(0,queue_range):   
+                follower_name = getQueueList()[0]
+                followers_waiting = len(getQueueList())
+                tweet(follower_name) # 'Thank you @{follower_name} :)!
                 deleteFollowerInQueue(follower_name)
                 addUser(follower_name)
                 print(f'@{follower_name} is now following the BOT')
                 print(f'Position : {followers_waiting}')
-                time.sleep(6)
+                time.sleep(10)
 
             getRequests()
             print('Waiting a minute...')
         except tweepy.error.TweepError as tpe:
             print(f'ERROR: {tpe}')
             print('ERROR: trying again...')  
-            time.sleep(5 * 60)  
-            time.sleep(5 * 60) 
+        except:
+            print(f'ERROR: Undefined')
+            print('ERROR: trying again...')  
         time.sleep(61)
 
 def addAllFollowersToJsonFile():
