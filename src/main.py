@@ -11,6 +11,7 @@ from jsonFollowers import addFollowerInQueue
 from jsonFollowers import deleteFollowerInQueue
 from jsonFollowers import getQueueList
 import credentials
+import os
 
 # Replace with your own keys/tokens 
 api_key = credentials.api_key
@@ -27,6 +28,8 @@ auth=tweepy.OAuthHandler(api_key,api_secret_key)
 auth.set_access_token(access_token,access_token_secret)
 api=tweepy.API(auth)
 
+path = os.getcwd().replace("src", "")
+
 def getRequests(): # Get how many requests are left 
     request = client.request('https://api.twitter.com/1.1/application/rate_limit_status.json')
 
@@ -41,7 +44,7 @@ def tweet(follower_name):
     picture_number = randint(0,52)  #52 = number of pictures in 'Images' folder
     #print(f'Picture number: {nfoto}')
     texto = f'Obrigado @{follower_name} por me seguir :)'
-    api.update_with_media(f'./Images/{picture_number}.jpg', texto)
+    api.update_with_media(f'{path}Images\\{picture_number}.jpg', texto)
 
 
 def start():
@@ -65,6 +68,7 @@ def start():
             for x in range(0,200): 
                 follower_name = followers[x]['screen_name']
                 addFollowerInQueue(follower_name)
+                #verifyUserWithOwnerAccount(follower_name)
 
             queue_range = len(getQueueList())
             if queue_range >= 20: queue_range = 20
@@ -109,6 +113,32 @@ def getFollowersNow():
     follower_count = api.get_user(twitter_acount_user).followers_count
     return follower_count
 
+# def getOwnerFollowers():
+#     try:
+#         request = client.request('https://api.twitter.com/1.1/followers/list.json?screen_name=igorulian')
+#         decoder = request[1].decode()
+
+#         obj = json.loads(decoder)
+#         followers = obj['users']
+
+#         rangeF = len(followers)
+#         users = ''
+#         for x in range(0,rangeF): 
+#             follower_name = followers[x]['screen_name']
+#             users = users + ',' + follower_name
+#         return users
+#     except tweepy.error.RateLimitError as tpe:
+#         print(f'ERRO: {tpe}')
+
+# def verifyUserWithOwnerAccount(username):
+#     if not verifyUser(username):
+#         if username in getOwnerFollowers():
+#             tweet(username) # 'Thank you @{follower_name} :)!
+#             deleteFollowerInQueue(username)
+#             addUser(username)
+#             print(f'@{username} is now following the BOT --- JA SEGUI O OWNER')
+#             print(f'Position : {username} -----------------------------------')
+        
 start()
 
 

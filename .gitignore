@@ -1,7 +1,8 @@
 debug.json
 /__pycache__
 credentials.py
-dados.json
+/data/dados.json
 *.jpg
-arruamarSeguidor.txt
-followers_in_queue.json
+/data/followers_in_queue.json
+*.json
+*.txt

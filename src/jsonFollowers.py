@@ -1,17 +1,20 @@
 import json
 
+data_path = "C:\\Users\\Particular\\Dev\\FocaCharmosa\\data\\dados.json"
+queue_path = "C:\\Users\\Particular\\Dev\\FocaCharmosa\\data\\followers_in_queue.json"
+
 def addUser(nome): # add user to json file
-    with open('dados.json') as json_file:
+    with open(data_path) as json_file:
         data = json.load(json_file)
         data["Usuarios"].append(nome)
         json_file.close()
 
-    with open('dados.json', 'w') as outfile:
+    with open(data_path, 'w') as outfile:
         json.dump(data, outfile) 
 
 
 def verifyUser(nome): # virify if user 'nome' is on json file
-    with open('dados.json') as json_file:
+    with open(data_path) as json_file:
         data = json.load(json_file)
         if nome in data["Usuarios"]:
             return True
@@ -19,32 +22,32 @@ def verifyUser(nome): # virify if user 'nome' is on json file
             return False
 
 def getFollowersJson(): # return all json file users
-    with open('dados.json') as json_file:
+    with open(data_path) as json_file:
         data = json.load(json_file)
         return data["Usuarios"]
 
 def deleteFollowerInQueue(user):
-    with open('followers_in_queue.json') as json_file:
+    with open(queue_path) as json_file:
         data = json.load(json_file)
         if user in data["Followers"]:
             data["Followers"].remove(user)
             json_file.close()
 
-    with open('followers_in_queue.json', 'w') as outfile:
+    with open(queue_path, 'w') as outfile:
         json.dump(data, outfile) 
 
 def addFollowerInQueue(user): 
     if not verifyFollowersInQueue(user):
-        with open('followers_in_queue.json') as json_file:
+        with open(queue_path) as json_file:
             data = json.load(json_file)
             data["Followers"].append(user)
             json_file.close()
 
-        with open('followers_in_queue.json', 'w') as outfile:
+        with open(queue_path, 'w') as outfile:
             json.dump(data, outfile) 
 
 def verifyFollowersInQueue(user):
-    with open('followers_in_queue.json') as json_file:
+    with open(queue_path) as json_file:
         data = json.load(json_file)
         if user in data["Followers"]:
             json_file.close()
@@ -54,6 +57,6 @@ def verifyFollowersInQueue(user):
             return False
 
 def getQueueList():
-    with open('followers_in_queue.json') as json_file:
+    with open(queue_path) as json_file:
         data = json.load(json_file)
         return data["Followers"]
