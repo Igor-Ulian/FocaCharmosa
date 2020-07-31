@@ -5,9 +5,3 @@
 
 
 # How to use:
-Create the 'credentials.py' file in src folder
-add your twitter keys this way: 
-
-* imagem mostrando o credentails * 
-
-run the main.py :)
