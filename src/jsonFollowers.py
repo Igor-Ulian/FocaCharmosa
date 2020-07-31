@@ -1,7 +1,10 @@
 import json
+import os
 
-data_path = "C:\\Users\\Particular\\Dev\\FocaCharmosa\\data\\dados.json"
-queue_path = "C:\\Users\\Particular\\Dev\\FocaCharmosa\\data\\followers_in_queue.json"
+path = os.getcwd().replace("src", "")
+
+data_path = f'{path}data\\dados.json'
+queue_path = f'{path}data\\followers_in_queue.json'
 
 def addUser(nome): # add user to json file
     with open(data_path) as json_file:
