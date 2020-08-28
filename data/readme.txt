@@ -1,1 +1,1 @@
-In this folder you have to create 'dados.json' and 'followers_in_queue.json' files
+In this folder the bot will create the data files :)

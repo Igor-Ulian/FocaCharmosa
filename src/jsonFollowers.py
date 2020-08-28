@@ -6,6 +6,21 @@ path = os.getcwd().replace("src", "")
 data_path = f'{path}data\\dados.json'
 queue_path = f'{path}data\\followers_in_queue.json'
 
+def verifyPath():
+    if not os.path.isfile(f'{path}data/followers_in_queue.json'):
+        file = open(f'{path}data/followers_in_queue.json', "w") 
+        file.write("") 
+        file.close()
+        print("followers_in_queue.json was crated!")
+
+    if not os.path.isfile(f'{path}data/dados.json'):
+        file = open(f'{path}data/dados.json', "w") 
+        file.write("") 
+        file.close() 
+        print("dados.json was crated!")
+
+verifyPath()
+
 def addUser(nome): # add user to json file
     with open(data_path) as json_file:
         data = json.load(json_file)
